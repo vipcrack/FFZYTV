@@ -18,15 +18,14 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Grant execute permission for gradlew
-        run: chmod +x ./gradlew
+      - name: Setup Gradle (without wrapper)
+        uses: gradle/actions/setup-gradle@v4  # 官方 Gradle Action
 
       - name: Build debug APK
-        run: ./gradlew assembleDebug
+        run: gradle assembleDebug  # 注意：这里用 gradle 而不是 ./gradlew
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: ffzy-movie-debug-apk
           path: app/build/outputs/apk/debug/app-debug.apk
-          if-no-files-found: error
