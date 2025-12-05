@@ -21,26 +21,26 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Generate Android Project
-        run: python create_ffzy_tv_app_v1.0.py
-
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
-      - name: Cache Gradle
+      - name: Generate FFZY TV Android Project
+        run: python create_ffzy_tv_app.py
+
+      - name: Cache Gradle dependencies
         uses: actions/cache@v4
         with:
           path: |
-            ~/.gradle/wrapper
             ~/.gradle/caches
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/gradle-wrapper.properties') }}
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
 
       - name: Build Debug APK
         run: ./gradlew assembleDebug --no-daemon
 
-      - name: Upload APK
+      - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: ffzy-tv-debug-apk
