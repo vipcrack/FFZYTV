@@ -1,54 +1,26 @@
-name: Build FFZY Movie APK
+name: Build APK
 
-on:
-  push:
-    branches: [ "main", "master" ]
-  pull_request:
-  workflow_dispatch:
+on: [push, pull_request, workflow_dispatch]
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up JDK 17
-        uses: actions/setup-java@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v3
         with:
           java-version: '17'
           distribution: 'temurin'
 
-      # 检查 gradlew 是否存在
-      - name: Check for gradlew
+      # 关键：确保 gradlew 是官方生成的！
+      - name: Verify gradlew
         run: |
-          if [ ! -f "./gradlew" ]; then
-            echo "❌ FATAL: ./gradlew not found in repository root."
-            echo "👉 Please ensure the Gradle Wrapper is correctly generated and committed."
-            exit 1
-          fi
-          echo "✅ Found ./gradlew"
+          head -n 2 gradlew  # 应显示 #!/bin/bash
+          chmod +x gradlew
 
-      # 修复可能的换行符问题（Windows CRLF → Unix LF）
-      - name: Fix line endings in gradlew (CRLF → LF)
-        run: |
-          sed -i 's/\r$//' ./gradlew
-          echo "Converted line endings to LF."
-
-      # 确保 gradlew 是可执行文件
-      - name: Make gradlew executable
-        run: |
-          chmod +x ./gradlew
-          ls -l ./gradlew
-
-      # 构建 APK
-      - name: Build debug APK
+      - name: Build
         run: ./gradlew assembleDebug --stacktrace
 
-      # 上传构建产物
-      - name: Upload APK artifact
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
-          name: ffzy-movie-debug-apk
           path: app/build/outputs/apk/debug/app-debug.apk
