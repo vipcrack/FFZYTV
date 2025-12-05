@@ -1,15 +1,14 @@
-// app/build.gradle
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
 }
 
 android {
-    namespace 'your.package.name' // 替换为您的实际包名
+    namespace 'com.ffzy.tv'
     compileSdk 34
 
     defaultConfig {
-        applicationId "your.package.name"
+        applicationId "com.ffzy.tv"
         minSdk 21
         targetSdk 34
         versionCode 1
@@ -19,10 +18,6 @@ android {
     }
 
     buildTypes {
-        debug {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-        }
         release {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
@@ -33,22 +28,30 @@ android {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
     }
-
     kotlinOptions {
         jvmTarget = '17'
     }
 }
 
 dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib"
+
     implementation 'androidx.core:core-ktx:1.12.0'
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'com.google.android.material:material:1.11.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
 
-    // ✅ 只保留主 stdlib，不要单独引入 -jdk7 或 -jdk8
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    // 可选：添加网络、图片加载等常用库（按需启用）
+    // implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    // implementation 'com.github.bumptech.glide:glide:4.16.0'
 
-    // 其他依赖...
-    // 注意：如果某些第三方库间接引入了旧版 kotlin-stdlib-jdk8，
-    // 上面 allprojects 中的 exclude 已经处理了冲突
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+}
+
+// 排除旧版 Kotlin 标准库
+configurations.all {
+    exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk7'
+    exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk8'
 }

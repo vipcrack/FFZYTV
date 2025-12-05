@@ -1,35 +1,13 @@
 // build.gradle (Project-level)
-
-buildscript {
-    ext.kotlin_version = '1.8.22' // 确保与您使用的版本一致
-    repositories {
-        google()
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:8.2.0' // 或您当前 AGP 版本
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-    }
+plugins {
+    id 'com.android.application' version '8.2.0' apply false
+    id 'com.android.library' version '8.2.0' apply false
+    id 'org.jetbrains.kotlin.android' version '1.9.22' apply false
 }
 
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
-    }
-
-    // 👇 关键修复：强制统一 Kotlin 标准库，并排除 jdk7/jdk8 模块
-    configurations.all {
-        resolutionStrategy {
-            // 强制使用统一版本
-            force "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-            force "org.jetbrains.kotlin:kotlin-stdlib-common:$kotlin_version"
-
-            // 排除旧的、已废弃的 jdk7/jdk8 模块
-            exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk7'
-            exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk8'
-        }
-    }
+ext {
+    kotlin_version = '1.9.22'
+    agp_version = '8.2.0'
 }
 
 task clean(type: Delete) {
