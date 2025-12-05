@@ -20,12 +20,8 @@ android {
     buildTypes {
         release {
             minifyEnabled true
-            shrinkResources true // 推荐：同时移除未使用的资源
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-        }
-        debug {
-            minifyEnabled false
-            // 可选：调试时也启用资源压缩（一般不建议）
         }
     }
 
@@ -33,35 +29,25 @@ android {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
     }
-
     kotlinOptions {
         jvmTarget = '17'
-    }
-
-    // 如果使用 ViewBinding 或其他特性，可在此处启用
-    buildFeatures {
-        // viewBinding true
-        // compose false // 如未使用 Compose，保持默认即可
     }
 }
 
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:1.9.20" // 显式指定版本更安全
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:1.9.20"
 
     implementation 'androidx.core:core-ktx:1.12.0'
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'com.google.android.material:material:1.11.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
 
-    // 常用库（按需取消注释）
-    // implementation 'com.squareup.retrofit2:retrofit:2.9.0'
-    // implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
-    // implementation 'com.github.bumptech.glide:glide:4.16.0'
-    // annotationProcessor 'com.github.bumptech.glide:compiler:4.16.0'
-
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
 }
 
-// 防止 Kotlin 标准
+configurations.all {
+    exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk7'
+    exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk8'
+}
