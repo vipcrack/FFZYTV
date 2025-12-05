@@ -25,7 +25,7 @@ jobs:
           echo "📥 Downloading Gradle 8.0..."
           curl -L -O https://services.gradle.org/distributions/gradle-8.0-bin.zip
           echo "📦 Extracting gradlew..."
-          unzip -p gradle-8.0-bin.zip gradle-8.0/gradlew > gradlew
+          unzip -p gradle-8.0-bin.zip gradle-8.0/bin/gradlew > gradlew
           chmod +x gradlew
 
       - name: Create gradle-wrapper.properties
