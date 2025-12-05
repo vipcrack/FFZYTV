@@ -1,17 +1,10 @@
-// Top-level build file
 buildscript {
     repositories {
         google()
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.5.0' // Compatible with Gradle 8.6
+        classpath 'com.android.tools.build:gradle:8.5.0'
     }
 }
-
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
-    }
-}
+// NOTE: allprojects.repositories REMOVED for Gradle 8.2+ compatibility
