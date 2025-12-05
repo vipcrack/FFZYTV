@@ -1,13 +1,13 @@
 package com.ffzy.tv
 
+import android.app.Activity
 import android.os.Bundle
-import androidx.fragment.app.FragmentActivity
 
-class MainActivity : FragmentActivity() {
+class MainActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (savedInstanceState == null) {
-            supportFragmentManager.beginTransaction()
+            fragmentManager.beginTransaction()
                 .replace(android.R.id.content, MainFragment())
                 .commit()
         }
