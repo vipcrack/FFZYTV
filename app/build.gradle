@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace 'your.package.name' // 替换为你的实际包名
+    namespace 'your.package.name' // 替换为您的实际包名
     compileSdk 34
 
     defaultConfig {
@@ -18,6 +18,17 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    buildTypes {
+        debug {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
@@ -26,29 +37,18 @@ android {
     kotlinOptions {
         jvmTarget = '17'
     }
-
-    buildFeatures {
-        // 如使用 Compose
-        // compose true
-    }
-
-    // 👇 可选：显式指定 Kotlin stdlib（通常不需要，但可加强一致性）
-    dependencies {
-        implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    }
 }
 
 dependencies {
     implementation 'androidx.core:core-ktx:1.12.0'
     implementation 'androidx.appcompat:appcompat:1.6.1'
-    // 其他依赖...
+    implementation 'com.google.android.material:material:1.11.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
 
-    // 如果你有其他 Kotlin 相关依赖，确保它们也兼容 1.8.22
-}
-configurations.all {
-    resolutionStrategy {
-        force 'org.jetbrains.kotlin:kotlin-stdlib:1.8.22'
-        force 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.22' // 实际上已包含在 stdlib 中，但可保留以防某些依赖仍引用
-        force 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.22'
-    }
+    // ✅ 只保留主 stdlib，不要单独引入 -jdk7 或 -jdk8
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+
+    // 其他依赖...
+    // 注意：如果某些第三方库间接引入了旧版 kotlin-stdlib-jdk8，
+    // 上面 allprojects 中的 exclude 已经处理了冲突
 }
