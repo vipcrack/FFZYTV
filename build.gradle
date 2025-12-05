@@ -4,7 +4,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.5.0'
+        classpath 'com.android.tools.build:gradle:8.5.0' // AGP 8.5.0 → Requires Gradle 8.7
     }
 }
-// NOTE: allprojects.repositories REMOVED for Gradle 8.2+ compatibility
+// ⚠️ 注意：allprojects.repositories 已移除，符合 Gradle 8.7 策略

@@ -5,6 +5,7 @@ plugins {
 android {
     namespace 'com.ffzy.tv'
     compileSdk 34
+
     defaultConfig {
         applicationId "com.ffzy.tv"
         minSdk 21
@@ -12,12 +13,14 @@ android {
         versionCode 1
         versionName "1.0"
     }
+
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
