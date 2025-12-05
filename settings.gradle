@@ -20,5 +20,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "YourAppName"
+rootProject.name = "FFZYTV"
 include ':app'
+
