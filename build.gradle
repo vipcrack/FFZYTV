@@ -1,10 +1,28 @@
+// build.gradle (Project level)
 buildscript {
+    ext.kotlin_version = '1.8.22' // 👈 统一 Kotlin 版本
+
     repositories {
         google()
         mavenCentral()
     }
+
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.5.0' // AGP 8.5.0 → Requires Gradle 8.7
+        classpath 'com.android.tools.build:gradle:8.2.0' // 确保 AGP 兼容 Kotlin 1.8+
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        // 其他 classpath...
     }
 }
-// ⚠️ 注意：allprojects.repositories 已移除，符合 Gradle 8.7 策略
+
+// 👇 全局排除旧版 Kotlin stdlib-jdk7/jdk8（关键！）
+subprojects {
+    configurations.all {
+        resolutionStrategy {
+            force "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+            force "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+            force "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+        }
+        exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk7'
+        exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk8'
+    }
+}
