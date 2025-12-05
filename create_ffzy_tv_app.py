@@ -1,33 +1,32 @@
 #!/usr/bin/env python3
-"""
-一键生成 FFZY TV Android 应用（需提前存在 gradle wrapper）
-"""
-
 import os
 from base64 import b64decode
 
-# === 配置区 ===
 PACKAGE_NAME = "com.ffzy.tv"
 APP_LABEL = "非凡影视"
 LAUNCH_URL = "http://cj.ffzyapi.com/"
-
-# 极简透明 PNG（1x1 像素）
 TRANSPARENT_PNG_B64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAsgByZ0dVjYAAAAASUVORK5CYII="
 
-def write_file(path: str, content: str):
-    os.makedirs(os.path.dirname(path), exist_ok=True)
-    with open(path, "w", encoding="utf-8") as f:
-        f.write(content.strip() + "\n")
+def write_file(path, content):
+    # 获取目录部分，如果为空则表示当前目录
+    dir_path = os.path.dirname(path)
+    if dir_path:
+        os.makedirs(dir_path, exist_ok=True)
+    with open(path, 'w', encoding='utf-8') as f:
+        f.write(content.strip() + '\n')
 
-def write_binary_file(path: str, data: bytes):
-    os.makedirs(os.path.dirname(path), exist_ok=True)
-    with open(path, "wb") as f:
+def write_binary_file(path, data):
+    dir_path = os.path.dirname(path)
+    if dir_path:
+        os.makedirs(dir_path, exist_ok=True)
+    with open(path, 'wb') as f:
         f.write(data)
 
-def main():
-    # === 1. 项目根目录 build.gradle ===
-    write_file("build.gradle", """
-// Top-level build file
+# === 开始生成文件 ===
+print("🔧 正在生成 FFZY TV 项目...")
+
+# 根目录文件
+write_file("build.gradle", """
 buildscript {
     repositories {
         google()
@@ -39,8 +38,7 @@ buildscript {
 }
 """)
 
-    # === 2. settings.gradle ===
-    write_file("settings.gradle", """
+write_file("settings.gradle", """
 pluginManagement {
     repositories {
         google()
@@ -59,8 +57,8 @@ rootProject.name = "FFZYTV"
 include ':app'
 """)
 
-    # === 3. app/build.gradle ===
-    write_file("app/build.gradle", f"""
+# app 模块
+write_file("app/build.gradle", f"""
 plugins {{
     id 'com.android.application'
 }}
@@ -96,8 +94,8 @@ dependencies {{
 }}
 """)
 
-    # === 4. AndroidManifest.xml ===
-    write_file("app/src/main/AndroidManifest.xml", f"""<?xml version="1.0" encoding="utf-8"?>
+# AndroidManifest.xml
+write_file("app/src/main/AndroidManifest.xml", f"""<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.INTERNET"/>
     <application
@@ -121,15 +119,14 @@ dependencies {{
 </manifest>
 """)
 
-    # === 5. strings.xml ===
-    write_file("app/src/main/res/values/strings.xml", f"""<?xml version="1.0" encoding="utf-8"?>
+# 资源文件
+write_file("app/src/main/res/values/strings.xml", f"""<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">{APP_LABEL}</string>
 </resources>
 """)
 
-    # === 6. styles.xml ===
-    write_file("app/src/main/res/values/styles.xml", """<?xml version="1.0" encoding="utf-8"?>
+write_file("app/src/main/res/values/styles.xml", """<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <style name="AppTheme" parent="Theme.AppCompat.NoActionBar">
         <item name="android:windowFullscreen">true</item>
@@ -138,9 +135,9 @@ dependencies {{
 </resources>
 """)
 
-    # === 7. MainActivity.java ===
-    java_dir = f"app/src/main/java/{PACKAGE_NAME.replace('.', '/')}"
-    write_file(f"{java_dir}/MainActivity.java", f"""package {PACKAGE_NAME};
+# Java 文件
+java_dir = f"app/src/main/java/{PACKAGE_NAME.replace('.', '/')}"
+write_file(f"{java_dir}/MainActivity.java", f"""package {PACKAGE_NAME};
 
 import android.os.Bundle;
 import android.webkit.WebView;
@@ -161,13 +158,9 @@ public class MainActivity extends AppCompatActivity {{
 }}
 """)
 
-    # === 8. 透明图标（所有密度）===
-    for density in ["mdpi", "hdpi", "xhdpi", "xxhdpi", "xxxhdpi"]:
-        icon_path = f"app/src/main/res/mipmap-{density}/ic_launcher.png"
-        write_binary_file(icon_path, b64decode(TRANSPARENT_PNG_B64))
+# 透明图标
+for density in ["mdpi", "hdpi", "xhdpi", "xxhdpi", "xxxhdpi"]:
+    icon_path = f"app/src/main/res/mipmap-{density}/ic_launcher.png"
+    write_binary_file(icon_path, b64decode(TRANSPARENT_PNG_B64))
 
-    print("✅ FFZY TV 项目已生成！")
-    print("📁 项目结构已就绪，可直接运行 ./gradlew assembleDebug")
-
-if __name__ == "__main__":
-    main()
+print("✅ FFZY TV 项目生成成功！")
