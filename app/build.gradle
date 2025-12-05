@@ -1,49 +1,24 @@
-android {
-    compileSdk 34
+// 在 app/build.gradle 中
+android { /* ... */ }
 
-    defaultConfig {
-        applicationId "com.ffzy.tv"
-        minSdk 21
-        targetSdk 34
-        versionCode 1
-        versionName "1.0"
-
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-    }
-
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-        }
-    }
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
-    }
-    kotlinOptions {
-        jvmTarget = '17'
-    }
-}
-
-// ✅ 关键修复：只强制主 stdlib，不要 jdk7/jdk8
 configurations.all {
     resolutionStrategy {
+        // 只强制主 stdlib，不要 jdk7/jdk8（它们在 1.8+ 已废弃）
         force 'org.jetbrains.kotlin:kotlin-stdlib:1.9.22'
-        // ❌ 删除以下两行（它们已不存在于 1.9+）
-        // force 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.9.22'
-        // force 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.22'
     }
 }
 
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:1.9.22" // ✅ 显式声明
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:1.9.22"
 
-    implementation 'androidx.core:core-ktx:1.12.0'
-    implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'androidx.leanback:leanback:1.1.0'
-    implementation 'com.google.android.exoplayer:exoplayer:2.19.1'
-
-    // 可选：如果使用 Fragment（如 BrowseSupportFragment），加上这个
-    implementation 'androidx.fragment:fragment-ktx:1.6.2'
+    // 显式排除所有依赖中的旧版 jdk7/jdk8
+    implementation('androidx.leanback:leanback:1.1.0') {
+        exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk7'
+        exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk8'
+    }
+    implementation('com.google.android.exoplayer:exoplayer:2.19.1') {
+        exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk7'
+        exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk8'
+    }
+    // 对其他 androidx 依赖也做同样处理
 }
