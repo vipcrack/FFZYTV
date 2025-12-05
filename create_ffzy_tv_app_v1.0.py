@@ -8,16 +8,20 @@ LAUNCH_URL = "http://cj.ffzyapi.com/"
 TRANSPARENT_PNG_B64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAsgByZ0dVjYAAAAASUVORK5CYII="
 
 def write_file(path, content):
-    os.makedirs(os.path.dirname(path), exist_ok=True)
+    dir_path = os.path.dirname(path)
+    if dir_path:
+        os.makedirs(dir_path, exist_ok=True)
     with open(path, "w", encoding="utf-8") as f:
         f.write(content.strip() + "\n")
 
 def write_binary_file(path, data):
-    os.makedirs(os.path.dirname(path), exist_ok=True)
+    dir_path = os.path.dirname(path)
+    if dir_path:
+        os.makedirs(dir_path, exist_ok=True)
     with open(path, "wb") as f:
         f.write(data)
 
-# Root build.gradle
+# Root files (no directory prefix)
 write_file("build.gradle", """
 buildscript {
     repositories { google(); mavenCentral(); }
@@ -25,7 +29,6 @@ buildscript {
 }
 """)
 
-# settings.gradle
 write_file("settings.gradle", """
 pluginManagement {
     repositories { google(); mavenCentral(); gradlePluginPortal(); }
@@ -38,7 +41,7 @@ rootProject.name = "FFZYTV"
 include ':app'
 """)
 
-# gradle-wrapper.properties (with Tencent mirror)
+# Files with directories — safe to create parent dirs
 write_file("gradle/wrapper/gradle-wrapper.properties", """distributionBase=GRADLE_USER_HOME
 distributionPath=wrapper/dists
 distributionUrl=https\\://mirrors.cloud.tencent.com/gradle/gradle-8.7-bin.zip
@@ -46,7 +49,6 @@ zipStoreBase=GRADLE_USER_HOME
 zipStorePath=wrapper/dists
 """)
 
-# app/build.gradle
 write_file("app/build.gradle", f"""
 plugins {{ id 'com.android.application' }}
 android {{
@@ -71,7 +73,6 @@ dependencies {{
 }}
 """)
 
-# AndroidManifest.xml
 write_file("app/src/main/AndroidManifest.xml", f"""<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.INTERNET"/>
@@ -96,17 +97,14 @@ write_file("app/src/main/AndroidManifest.xml", f"""<?xml version="1.0" encoding=
 </manifest>
 """)
 
-# strings.xml
 write_file("app/src/main/res/values/strings.xml", f"""<?xml version="1.0" encoding="utf-8"?>
 <resources><string name="app_name">{APP_NAME}</string></resources>""")
 
-# styles.xml
 write_file("app/src/main/res/values/styles.xml", """<?xml version="1.0" encoding="utf-8"?>
 <resources><style name="AppTheme" parent="Theme.AppCompat.NoActionBar">
     <item name="android:windowFullscreen">true</item>
 </style></resources>""")
 
-# MainActivity.java
 java_path = f"app/src/main/java/{PACKAGE.replace('.', '/')}/MainActivity.java"
 write_file(java_path, f"""package {PACKAGE};
 import android.os.Bundle;
@@ -125,15 +123,14 @@ public class MainActivity extends AppCompatActivity {{
     }}
 }}""")
 
-# ic_launcher.png (transparent 1x1)
 for d in ["mdpi", "hdpi", "xhdpi", "xxhdpi", "xxxhdpi"]:
     write_binary_file(f"app/src/main/res/mipmap-{d}/ic_launcher.png", b64decode(TRANSPARENT_PNG_B64))
 
-# gradlew
+# gradlew scripts
 if os.name == "nt":
     write_file("gradlew.bat", "@echo off\njava -classpath gradle/wrapper/gradle-wrapper.jar org.gradle.wrapper.GradleWrapperMain %*\n")
 else:
     write_file("gradlew", "#!/bin/sh\nexec \"$(dirname \"$0\")/gradle/wrapper/gradle-wrapper.jar\" \"$@\"\n")
     os.chmod("gradlew", 0o755)
 
-print("✅ Project generated successfully!")
+print("✅ FFZY TV project generated successfully!")
