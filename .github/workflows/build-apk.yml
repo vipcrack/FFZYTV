@@ -1,4 +1,5 @@
 name: Build FFZY Movie APK
+
 on:
   push:
     branches: [ "main", "master" ]
@@ -8,6 +9,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -18,11 +20,18 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Grant execute permission for gradlew
-        run: chmod +x ./gradlew
+      # 🔧 关键修复：确保 gradlew 存在且可执行
+      - name: Verify and make gradlew executable
+        run: |
+          if [ ! -f "./gradlew" ]; then
+            echo "❌ Error: ./gradlew not found! Please commit the Gradle Wrapper files."
+            exit 1
+          fi
+          chmod +x ./gradlew
+          ls -l ./gradlew  # 调试：显示权限
 
       - name: Build debug APK
-        run: ./gradlew assembleDebug
+        run: ./gradlew assembleDebug --stacktrace
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
