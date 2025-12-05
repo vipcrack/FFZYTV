@@ -23,7 +23,7 @@ jobs:
       - name: Download and extract official gradlew
         run: |
           echo "📥 Downloading Gradle 8.0..."
-          curl -L -O https://services.gradle.org/distributions/gradle-8.0-bin.zip
+          curl -L -o gradle-8.0-bin.zip https://services.gradle.org/distributions/gradle-8.0-bin.zip
           echo "📦 Extracting gradlew..."
           unzip -p gradle-8.0-bin.zip gradle-8.0/bin/gradlew > gradlew
           chmod +x gradlew
