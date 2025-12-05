@@ -20,7 +20,6 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      # 🔧 自动生成正确的 gradlew（绕过你仓库里的坏文件）
       - name: Generate official Gradle Wrapper files
         run: |
           echo "Downloading Gradle 8.0..."
@@ -29,18 +28,17 @@ jobs:
           echo "Extracting gradlew script..."
           unzip -p gradle-8.0-bin.zip gradle-8.0/gradlew > gradlew
           
-          echo "Setting permissions..."
+          echo "Setting execute permission..."
           chmod +x gradlew
-          
-          echo "Creating gradle-wrapper.properties..."
+
+      - name: Create gradle-wrapper.properties
+        run: |
           mkdir -p gradle/wrapper
-          cat > gradle/wrapper/gradle-wrapper.properties <<EOF
-distributionBase=GRADLE_USER_HOME
-distributionPath=wrapper/dists
-distributionUrl=https\://services.gradle.org/distributions/gradle-8.0-bin.zip
-zipStoreBase=GRADLE_USER_HOME
-zipStorePath=wrapper/dists
-EOF
+          echo "distributionBase=GRADLE_USER_HOME" > gradle/wrapper/gradle-wrapper.properties
+          echo "distributionPath=wrapper/dists" >> gradle/wrapper/gradle-wrapper.properties
+          echo "distributionUrl=https\://services.gradle.org/distributions/gradle-8.0-bin.zip" >> gradle/wrapper/gradle-wrapper.properties
+          echo "zipStoreBase=GRADLE_USER_HOME" >> gradle/wrapper/gradle-wrapper.properties
+          echo "zipStorePath=wrapper/dists" >> gradle/wrapper/gradle-wrapper.properties
 
       - name: Build debug APK
         run: ./gradlew assembleDebug --stacktrace
