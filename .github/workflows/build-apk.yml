@@ -20,21 +20,38 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      # 🔧 关键修复：确保 gradlew 存在且可执行
-      - name: Verify and make gradlew executable
+      # 🔍 检查 gradlew 是否存在
+      - name: Check Gradle Wrapper
         run: |
           if [ ! -f "./gradlew" ]; then
-            echo "❌ Error: ./gradlew not found! Please commit the Gradle Wrapper files."
+            echo "❌ FATAL: ./gradlew not found in repository root."
+            echo "👉 Please run locally: ./gradlew wrapper --gradle-version=8.0"
+            echo "   and commit gradlew, gradlew.bat, and gradle/ folder."
             exit 1
           fi
+          echo "✅ Found ./gradlew"
+
+      # 🔧 确保可执行（关键修复）
+      - name: Make gradlew executable
+        run: |
           chmod +x ./gradlew
-          ls -l ./gradlew  # 调试：显示权限
+          ls -l ./gradlew
 
+      # 🛠️ 构建 APK（优先用 ./gradlew，失败则用 bash 兜底）
       - name: Build debug APK
-        run: ./gradlew assembleDebug --stacktrace
+        run: |
+          if ./gradlew --version > /dev/null 2>&1; then
+            echo "Running with ./gradlew (native execute)"
+            ./gradlew assembleDebug --stacktrace --info
+          else
+            echo "Fallback: running with bash ./gradlew"
+            bash ./gradlew assembleDebug --stacktrace --info
+          fi
 
+      # 📤 上传构建产物
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: ffzy-movie-debug-apk
           path: app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
