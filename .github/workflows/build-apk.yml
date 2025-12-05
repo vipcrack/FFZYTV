@@ -1,4 +1,5 @@
-name: Build FFZY Movie APK
+# .github/workflows/build-apk.yml
+name: Build FFZYTV APK (with auto-generated wrapper)
 
 on:
   push:
@@ -20,15 +21,31 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      # 关键：确保可执行权限（即使已提交）
-      - name: Make gradlew executable
-        run: chmod +x gradlew
+      # 自动生成完整的 Gradle Wrapper（从官方 ZIP 提取）
+      - name: Generate Gradle Wrapper files
+        run: |
+          echo "Downloading Gradle 8.0..."
+          curl -L -o gradle-8.0-bin.zip https://services.gradle.org/distributions/gradle-8.0-bin.zip
+
+          echo "Extracting full gradle-wrapper.jar from ZIP..."
+          mkdir -p gradle/wrapper
+          unzip -q gradle-8.0-bin.zip 'gradle-8.0/lib/plugins/gradle-wrapper-8.0.jar' -d /tmp
+          # 注意：此 JAR 不完整！所以改用另一种方式 👇
+
+          # ✅ 正确方式：使用 Gradle 内置命令生成完整 wrapper
+          # 但我们没有 gradle 命令？→ 改用 Docker 生成（可靠）
+          docker run --rm -v "$PWD":/project -w /project gradle:8.0-jdk17 \
+            gradle wrapper --gradle-version 8.0 --no-daemon
+
+          echo "Fixing permissions..."
+          chmod +x gradlew
+          sed -i 's/\r$//' gradlew
 
       - name: Build debug APK
         run: ./gradlew assembleDebug --stacktrace
 
-      - name: Upload APK artifact
+      - name: Upload APK as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ffzy-movie-debug-apk
+          name: app-debug-apk
           path: app/build/outputs/apk/debug/app-debug.apk
