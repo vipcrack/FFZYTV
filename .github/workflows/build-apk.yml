@@ -21,10 +21,9 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      # ✅ 动态创建 Python 脚本（不依赖仓库文件）
       - name: Create project generator script
         run: |
-          cat > create_ffzy_tv_app_v1.0.py << 'EOF'
+          cat > create_ffzy_tv_app_v1.0.py << 'PY_EOF'
 #!/usr/bin/env python3
 import os
 from base64 import b64decode
@@ -159,62 +158,61 @@ public class MainActivity extends AppCompatActivity {{
 }}"""
 
 def ensure_dir(path): os.makedirs(path, exist_ok=True)
-def write_file(path, content): 
-    with open(path, "w", encoding="utf-8") as f: f.write(content.strip() + "\\n")
-def write_binary_file(path, data): 
-    with open(path, "wb") as f: f.write(data)
 
-GRADLEW_SH = "#!/bin/sh\\nexec \\\"`dirname \\\"$0\\\"`/gradle/wrapper/gradle-wrapper.jar\\\" \\\"$@\\\"\\n"
-GRADLEW_BAT = "@echo off\\njava -classpath gradle/wrapper/gradle-wrapper.jar org.gradle.wrapper.GradleWrapperMain %*\\n"
+def write_file(path, content):
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(content.strip() + "\n")
+
+def write_binary_file(path, data):
+    with open(path, "wb") as f:
+        f.write(data)
 
 def main():
     write_file("build.gradle", PROJECT_BUILD_GRADLE)
     write_file("settings.gradle", SETTINGS_GRADLE)
     ensure_dir("gradle/wrapper")
     write_file("gradle/wrapper/gradle-wrapper.properties", GRADLE_WRAPPER_PROPERTIES)
-    
+
     java_dir = os.path.join("app", "src", "main", "java", *PACKAGE.split("."))
     res_dir = os.path.join("app", "src", "main", "res")
-    ensure_dir(java_dir); ensure_dir(os.path.join(res_dir, "values"))
-    
+    ensure_dir(java_dir)
+    ensure_dir(os.path.join(res_dir, "values"))
+
     write_file(os.path.join("app", "build.gradle"), APP_BUILD_GRADLE)
     write_file(os.path.join("app", "src", "main", "AndroidManifest.xml"), ANDROID_MANIFEST)
     write_file(os.path.join(res_dir, "values", "strings.xml"), STRINGS_XML)
     write_file(os.path.join(res_dir, "values", "styles.xml"), STYLES_XML)
     write_file(os.path.join(java_dir, "MainActivity.java"), MAIN_ACTIVITY_JAVA)
-    
-    for d in ["mdpi", "hdpi", "xhdpi", "xxhdpi", "xxxhdpi"]:
-        p = os.path.join(res_dir, f"mipmap-{d}")
-        ensure_dir(p)
-        write_binary_file(os.path.join(p, "ic_launcher.png"), b64decode(TRANSPARENT_PNG_B64))
-    
+
+    for density in ["mdpi", "hdpi", "xhdpi", "xxhdpi", "xxxhdpi"]:
+        mipmap_dir = os.path.join(res_dir, f"mipmap-{density}")
+        ensure_dir(mipmap_dir)
+        write_binary_file(os.path.join(mipmap_dir, "ic_launcher.png"), b64decode(TRANSPARENT_PNG_B64))
+
     if os.name == "nt":
-        write_file("gradlew.bat", GRADLEW_BAT)
+        write_file("gradlew.bat", "@echo off\njava -classpath gradle/wrapper/gradle-wrapper.jar org.gradle.wrapper.GradleWrapperMain %*\n")
     else:
-        write_file("gradlew", GRADLEW_SH)
+        write_file("gradlew", "#!/bin/sh\nexec \"$(dirname \"$0\")/gradle/wrapper/gradle-wrapper.jar\" \"$@\"\n")
         os.chmod("gradlew", 0o755)
-    
+
     print("✅ FFZY TV project generated successfully!")
 
 if __name__ == "__main__":
     main()
-EOF
+PY_EOF
 
-      - name: Grant execute permission to gradlew (later)
-        run: chmod +x ./gradlew || true
+      - name: Generate Project
+        run: python create_ffzy_tv_app_v1.0.py
 
-      - name: Cache Gradle
+      - name: Cache Gradle dependencies
         uses: actions/cache@v4
         with:
           path: |
             ~/.gradle/wrapper
             ~/.gradle/caches
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/gradle-wrapper.properties', '**/create_ffzy_tv_app_v1.0.py') }}
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
-
-      - name: Generate Project
-        run: python create_ffzy_tv_app_v1.0.py
 
       - name: Build Debug APK
         run: ./gradlew assembleDebug --no-daemon
