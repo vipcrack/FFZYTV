@@ -13,12 +13,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # ✅ 使用官方 action 设置 Android SDK + JDK
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
         with:
-          sdk-versions: "34"  # 安装 platform-34
+          sdk-versions: "34"
 
+      # ✅ 不要再生成 gradlew！它已存在！
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
