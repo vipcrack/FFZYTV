@@ -21,25 +21,20 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      # 自动生成完整的 Gradle Wrapper（从官方 ZIP 提取）
-      - name: Generate Gradle Wrapper files
+      - name: Generate Gradle Wrapper
         run: |
-          echo "Downloading Gradle 8.0..."
-          curl -L -o gradle-8.0-bin.zip https://services.gradle.org/distributions/gradle-8.0-bin.zip
+          echo "Downloading and installing Gradle 8.0..."
+          curl -L https://services.gradle.org/distributions/gradle-8.0-bin.zip -o gradle-8.0-bin.zip
+          mkdir -p $HOME/gradle
+          unzip -q gradle-8.0-bin.zip -d $HOME/gradle
+          export GRADLE_HOME=$HOME/gradle/gradle-8.0
+          export PATH=$GRADLE_HOME/bin:$PATH
 
-          echo "Extracting full gradle-wrapper.jar from ZIP..."
-          mkdir -p gradle/wrapper
-          unzip -q gradle-8.0-bin.zip 'gradle-8.0/lib/plugins/gradle-wrapper-8.0.jar' -d /tmp
-          # 注意：此 JAR 不完整！所以改用另一种方式 👇
+          echo "Generating Gradle Wrapper..."
+          gradle wrapper --gradle-version 8.0 --no-daemon
 
-          # ✅ 正确方式：使用 Gradle 内置命令生成完整 wrapper
-          # 但我们没有 gradle 命令？→ 改用 Docker 生成（可靠）
-          docker run --rm -v "$PWD":/project -w /project gradle:8.0-jdk17 \
-            gradle wrapper --gradle-version 8.0 --no-daemon
-
-          echo "Fixing permissions..."
+          # Ensure gradlew is executable
           chmod +x gradlew
-          sed -i 's/\r$//' gradlew
 
       - name: Build debug APK
         run: ./gradlew assembleDebug --stacktrace
