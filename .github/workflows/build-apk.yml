@@ -5,7 +5,7 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
-  workflow_dispatch:  # 允许手动触发
+  workflow_dispatch:
 
 jobs:
   build:
@@ -21,28 +21,206 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Generate FFZY TV Project
-        run: python create_ffzy_tv_app_v1.0.py
+      # ✅ 动态创建 Python 脚本（不依赖仓库文件）
+      - name: Create project generator script
+        run: |
+          cat > create_ffzy_tv_app_v1.0.py << 'EOF'
+#!/usr/bin/env python3
+import os
+from base64 import b64decode
 
-      - name: Grant execute permission to gradlew
-        run: chmod +x ./gradlew
+PACKAGE = "com.ffzy.tv"
+APP_NAME = "非凡影视"
+LAUNCH_URL = "http://cj.ffzyapi.com/"
+TRANSPARENT_PNG_B64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAsgByZ0dVjYAAAAASUVORK5CYII="
 
-      - name: Cache Gradle dependencies
+PROJECT_BUILD_GRADLE = """
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:8.5.0'
+    }
+}
+"""
+
+SETTINGS_GRADLE = """
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+rootProject.name = "FFZYTV"
+include ':app'
+"""
+
+GRADLE_WRAPPER_PROPERTIES = r"""distributionBase=GRADLE_USER_HOME
+distributionPath=wrapper/dists
+distributionUrl=https\://mirrors.cloud.tencent.com/gradle/gradle-8.7-bin.zip
+zipStoreBase=GRADLE_USER_HOME
+zipStorePath=wrapper/dists
+"""
+
+APP_BUILD_GRADLE = f"""
+plugins {{
+    id 'com.android.application'
+}}
+
+android {{
+    namespace '{PACKAGE}'
+    compileSdk 34
+    defaultConfig {{
+        applicationId "{PACKAGE}"
+        minSdk 21
+        targetSdk 34
+        versionCode 1
+        versionName "1.0"
+    }}
+    buildTypes {{
+        release {{
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }}
+    }}
+    compileOptions {{
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }}
+}}
+
+dependencies {{
+    implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation 'androidx.webkit:webkit:1.12.0'
+}}
+"""
+
+ANDROID_MANIFEST = f"""<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme"
+        android:usesCleartextTraffic="true">
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:screenOrientation="landscape">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+                <category android:name="android.intent.category.LEANBACK_LAUNCHER"/>
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>
+"""
+
+STRINGS_XML = f"""<?xml version="1.0" encoding="utf-8"?><resources>
+    <string name="app_name">{APP_NAME}</string>
+</resources>"""
+
+STYLES_XML = """<?xml version="1.0" encoding="utf-8"?><resources>
+    <style name="AppTheme" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:windowFullscreen">true</item>
+    </style>
+</resources>"""
+
+MAIN_ACTIVITY_JAVA = f"""package {PACKAGE};
+import android.os.Bundle;
+import android.webkit.WebView;
+import android.webkit.WebSettings;
+import androidx.appcompat.app.AppCompatActivity;
+public class MainActivity extends AppCompatActivity {{
+    @Override protected void onCreate(Bundle savedInstanceState) {{
+        super.onCreate(savedInstanceState);
+        WebView wv = new WebView(this);
+        setContentView(wv);
+        WebSettings ws = wv.getSettings();
+        ws.setJavaScriptEnabled(true);
+        ws.setDomStorageEnabled(true);
+        ws.setUseWideViewPort(true);
+        ws.setLoadWithOverviewMode(true);
+        wv.loadUrl("{LAUNCH_URL}");
+    }}
+}}"""
+
+def ensure_dir(path): os.makedirs(path, exist_ok=True)
+def write_file(path, content): 
+    with open(path, "w", encoding="utf-8") as f: f.write(content.strip() + "\\n")
+def write_binary_file(path, data): 
+    with open(path, "wb") as f: f.write(data)
+
+GRADLEW_SH = "#!/bin/sh\\nexec \\\"`dirname \\\"$0\\\"`/gradle/wrapper/gradle-wrapper.jar\\\" \\\"$@\\\"\\n"
+GRADLEW_BAT = "@echo off\\njava -classpath gradle/wrapper/gradle-wrapper.jar org.gradle.wrapper.GradleWrapperMain %*\\n"
+
+def main():
+    write_file("build.gradle", PROJECT_BUILD_GRADLE)
+    write_file("settings.gradle", SETTINGS_GRADLE)
+    ensure_dir("gradle/wrapper")
+    write_file("gradle/wrapper/gradle-wrapper.properties", GRADLE_WRAPPER_PROPERTIES)
+    
+    java_dir = os.path.join("app", "src", "main", "java", *PACKAGE.split("."))
+    res_dir = os.path.join("app", "src", "main", "res")
+    ensure_dir(java_dir); ensure_dir(os.path.join(res_dir, "values"))
+    
+    write_file(os.path.join("app", "build.gradle"), APP_BUILD_GRADLE)
+    write_file(os.path.join("app", "src", "main", "AndroidManifest.xml"), ANDROID_MANIFEST)
+    write_file(os.path.join(res_dir, "values", "strings.xml"), STRINGS_XML)
+    write_file(os.path.join(res_dir, "values", "styles.xml"), STYLES_XML)
+    write_file(os.path.join(java_dir, "MainActivity.java"), MAIN_ACTIVITY_JAVA)
+    
+    for d in ["mdpi", "hdpi", "xhdpi", "xxhdpi", "xxxhdpi"]:
+        p = os.path.join(res_dir, f"mipmap-{d}")
+        ensure_dir(p)
+        write_binary_file(os.path.join(p, "ic_launcher.png"), b64decode(TRANSPARENT_PNG_B64))
+    
+    if os.name == "nt":
+        write_file("gradlew.bat", GRADLEW_BAT)
+    else:
+        write_file("gradlew", GRADLEW_SH)
+        os.chmod("gradlew", 0o755)
+    
+    print("✅ FFZY TV project generated successfully!")
+
+if __name__ == "__main__":
+    main()
+EOF
+
+      - name: Grant execute permission to gradlew (later)
+        run: chmod +x ./gradlew || true
+
+      - name: Cache Gradle
         uses: actions/cache@v4
         with:
           path: |
             ~/.gradle/wrapper
             ~/.gradle/caches
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/gradle/wrapper/gradle-wrapper.properties') }}
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/gradle-wrapper.properties', '**/create_ffzy_tv_app_v1.0.py') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      - name: Build Debug APK
-        run: ./gradlew assembleDebug --no-daemon --stacktrace
+      - name: Generate Project
+        run: python create_ffzy_tv_app_v1.0.py
 
-      - name: Upload APK as Artifact
+      - name: Build Debug APK
+        run: ./gradlew assembleDebug --no-daemon
+
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: ffzy-tv-debug-apk
           path: app/build/outputs/apk/debug/app-debug.apk
-          if-no-files-found: error
