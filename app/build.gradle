@@ -45,3 +45,10 @@ dependencies {
 
     // 如果你有其他 Kotlin 相关依赖，确保它们也兼容 1.8.22
 }
+configurations.all {
+    resolutionStrategy {
+        force 'org.jetbrains.kotlin:kotlin-stdlib:1.8.22'
+        force 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.22' // 实际上已包含在 stdlib 中，但可保留以防某些依赖仍引用
+        force 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.22'
+    }
+}
