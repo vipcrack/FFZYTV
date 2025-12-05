@@ -13,19 +13,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
+      # ✅ 使用官方 action 设置 Android SDK + JDK
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
         with:
-          java-version: '17'
-          distribution: 'temurin'
+          sdk-versions: "34"  # 安装 platform-34
 
       - name: Make gradlew executable
         run: chmod +x ./gradlew
-
-      - name: Install Android SDK
-        run: |
-          echo "Installing Android SDK components..."
-          sdkmanager --install "platforms;android-34" "build-tools;34.0.0" > /dev/null
 
       - name: Generate FFZY TV App
         run: python create_ffzy_tv_app.py
