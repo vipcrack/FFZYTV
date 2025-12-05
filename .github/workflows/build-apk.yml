@@ -1,5 +1,4 @@
-# .github/workflows/build-apk.yml
-name: Build FFZYTV APK (with auto-generated wrapper)
+name: Build FFZYTV APK
 
 on:
   push:
@@ -21,19 +20,18 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Generate Gradle Wrapper
+      - name: Generate Gradle Wrapper (Gradle 8.2)
         run: |
-          echo "Downloading and installing Gradle 8.0..."
-          curl -L https://services.gradle.org/distributions/gradle-8.0-bin.zip -o gradle-8.0-bin.zip
+          echo "Downloading Gradle 8.2..."
+          curl -L https://services.gradle.org/distributions/gradle-8.2-bin.zip -o gradle-8.2-bin.zip
           mkdir -p $HOME/gradle
-          unzip -q gradle-8.0-bin.zip -d $HOME/gradle
-          export GRADLE_HOME=$HOME/gradle/gradle-8.0
+          unzip -q gradle-8.2-bin.zip -d $HOME/gradle
+          export GRADLE_HOME=$HOME/gradle/gradle-8.2
           export PATH=$GRADLE_HOME/bin:$PATH
 
           echo "Generating Gradle Wrapper..."
-          gradle wrapper --gradle-version 8.0 --no-daemon
+          gradle wrapper --gradle-version 8.2 --no-daemon
 
-          # Ensure gradlew is executable
           chmod +x gradlew
 
       - name: Build debug APK
