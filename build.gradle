@@ -1,35 +1,33 @@
-// build.gradle (Project level)
+// build.gradle (Project-level)
 buildscript {
-    ext.kotlin_version = '1.8.22' // 👈 统一 Kotlin 版本
+    ext.kotlin_version = '1.8.22'
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:8.2.0' // 或您使用的 AGP 版本
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        // 其他 classpath 依赖...
+    }
+}
 
+allprojects {
     repositories {
         google()
         mavenCentral()
     }
 
-    dependencies {
-        classpath 'com.android.tools.build:gradle:8.2.0' // 确保 AGP 兼容 Kotlin 1.8+
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        // 其他 classpath...
-    }
-}
-
-// 👇 全局排除旧版 Kotlin stdlib-jdk7/jdk8（关键！）
-subprojects {
+    // 👇 新增：统一 Kotlin 标准库版本，排除旧版 jdk7/jdk8 模块
     configurations.all {
         resolutionStrategy {
             force "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-            force "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-            force "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+            exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk7'
+            exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk8'
         }
-        exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk7'
-        exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk8'
     }
 }
-configurations.all {
-    resolutionStrategy {
-        force 'org.jetbrains.kotlin:kotlin-stdlib:1.8.22'
-        force 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.22' // 实际上已包含在 stdlib 中，但可保留以防某些依赖仍引用
-        force 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.22'
-    }
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
 }
