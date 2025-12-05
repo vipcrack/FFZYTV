@@ -20,25 +20,30 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Generate official Gradle Wrapper files
+      - name: Download and extract official gradlew
         run: |
-          echo "Downloading Gradle 8.0..."
-          curl -O https://services.gradle.org/distributions/gradle-8.0-bin.zip
+          echo "📥 Downloading Gradle 8.0..."
+          curl -L -O https://services.gradle.org/distributions/gradle-8.0-bin.zip
           
-          echo "Extracting gradlew script..."
+          echo "🔍 Checking file size (should be ~120MB)..."
+          du -h gradle-8.0-bin.zip
+          
+          echo "📦 Extracting gradlew script..."
           unzip -p gradle-8.0-bin.zip gradle-8.0/gradlew > gradlew
           
-          echo "Setting execute permission..."
+          echo "🔐 Setting execute permission..."
           chmod +x gradlew
 
       - name: Create gradle-wrapper.properties
         run: |
           mkdir -p gradle/wrapper
-          echo "distributionBase=GRADLE_USER_HOME" > gradle/wrapper/gradle-wrapper.properties
-          echo "distributionPath=wrapper/dists" >> gradle/wrapper/gradle-wrapper.properties
-          echo "distributionUrl=https\://services.gradle.org/distributions/gradle-8.0-bin.zip" >> gradle/wrapper/gradle-wrapper.properties
-          echo "zipStoreBase=GRADLE_USER_HOME" >> gradle/wrapper/gradle-wrapper.properties
-          echo "zipStorePath=wrapper/dists" >> gradle/wrapper/gradle-wrapper.properties
+          cat > gradle/wrapper/gradle-wrapper.properties <<'EOF'
+distributionBase=GRADLE_USER_HOME
+distributionPath=wrapper/dists
+distributionUrl=https\://services.gradle.org/distributions/gradle-8.0-bin.zip
+zipStoreBase=GRADLE_USER_HOME
+zipStorePath=wrapper/dists
+EOF
 
       - name: Build debug APK
         run: ./gradlew assembleDebug --stacktrace
