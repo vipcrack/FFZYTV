@@ -1,24 +1,68 @@
-// 在 app/build.gradle 中
-android { /* ... */ }
+// app/build.gradle
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+}
 
+android {
+    namespace 'your.package.name' // 替换为你的实际包名
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "your.package.name"
+        minSdk 21
+        targetSdk 34
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        debug {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = '17'
+    }
+}
+
+// 👇 关键：强制统一 Kotlin 标准库版本，并排除旧模块
 configurations.all {
     resolutionStrategy {
-        // 只强制主 stdlib，不要 jdk7/jdk8（它们在 1.8+ 已废弃）
-        force 'org.jetbrains.kotlin:kotlin-stdlib:1.9.22'
+        force "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+        // 从 Kotlin 1.8+ 开始，stdlib 已包含 jdk7/jdk8 功能，无需单独引入
+        exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk7'
+        exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk8'
     }
 }
 
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:1.9.22"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    implementation 'androidx.core:core-ktx:1.12.0'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.11.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
 
-    // 显式排除所有依赖中的旧版 jdk7/jdk8
-    implementation('androidx.leanback:leanback:1.1.0') {
-        exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk7'
-        exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk8'
-    }
-    implementation('com.google.android.exoplayer:exoplayer:2.19.1') {
-        exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk7'
-        exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk8'
-    }
-    // 对其他 androidx 依赖也做同样处理
+    // 如果你有其他第三方库，确保不手动添加 kotlin-stdlib-jdk7/8
+    // 示例：如果某个库引入了旧版，可局部排除
+    // implementation('some.library:1.0') {
+    //     exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk8'
+    // }
+
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
 }
