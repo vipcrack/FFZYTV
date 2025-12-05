@@ -1,4 +1,26 @@
-plugins {
-    id 'com.android.application' version '8.5.0' apply false
-    id 'org.jetbrains.kotlin.android' version '1.9.22' apply false
+// build.gradle (Project-level)
+buildscript {
+    ext.kotlin_version = '1.8.22' // 统一 Kotlin 版本
+
+    repositories {
+        google()
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:8.2.2' // 确保与 Gradle 8.7 兼容
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        // 其他 classpath 依赖...
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
 }
