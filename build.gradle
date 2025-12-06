@@ -3,12 +3,7 @@ plugins {
     id 'org.jetbrains.kotlin.android' version '1.9.20' apply false
 }
 
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
-    }
-}
+// ❌ 删除 allprojects { repositories { ... } } 整个块！
 
 task clean(type: Delete) {
     delete rootProject.buildDir
