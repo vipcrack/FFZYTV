@@ -13,6 +13,7 @@ android {
         targetSdk 34
         versionCode 1
         versionName "1.0"
+
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -37,8 +38,8 @@ android {
     }
 }
 
-// 不再需要 force/exclude（如果 AGP+Kotlin 版本对齐，冲突会自动解决）
-// 但如果仍有冲突，再启用下面这段：
+// 🔧 【仅在仍有冲突时启用】—— 大多数情况下 AGP 8.5+ + Kotlin 1.9.20 可自动解决
+// 如果构建仍报 duplicate class，请取消注释以下块：
 /*
 configurations.all {
     resolutionStrategy {
@@ -50,12 +51,12 @@ configurations.all {
 */
 
 dependencies {
-    implementation 'androidx.core:core-ktx:1.12.0'
+    implementation 'androidx.core:core-ktx:1.13.1'      // 升级到最新稳定版
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'com.google.android.material:material:1.11.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.2.0'
 
-    // Leanback for TV
+    // ✅ Android TV 必需：提供 Theme.Leanback
     implementation 'androidx.leanback:leanback:1.1.0'
 
     testImplementation 'junit:junit:4.13.2'
