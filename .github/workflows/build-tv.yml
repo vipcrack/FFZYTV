@@ -1,3 +1,4 @@
+# .github/workflows/build.yml
 name: Build FFZYTV
 
 on: [push, workflow_dispatch]
@@ -23,11 +24,14 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      - name: Setup Gradle (8.7)
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: 8.7
+
       - name: Generate Gradle Wrapper
         working-directory: FFZYTV
-        run: |
-          # 使用系统 gradle 命令生成完整 wrapper
-          gradle wrapper --gradle-version 8.7
+        run: gradle wrapper --gradle-version 8.7
 
       - name: Build Debug APK
         working-directory: FFZYTV
