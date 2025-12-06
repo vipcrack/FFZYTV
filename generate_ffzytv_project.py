@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # generate_ffzytv_project.py
 # 用途：一键生成完整的 Android TV 项目 (com.ffzy.tv)
+# 注意：不生成 gradlew 脚本，避免递归调用！
 
 import os
 from pathlib import Path
@@ -67,7 +68,8 @@ include ':app'
 '''
     write_file(APP_DIR / "settings.gradle", content)
 
-def generate_gradle_wrapper():
+def generate_gradle_wrapper_properties():
+    """只生成 gradle-wrapper.properties，不生成 gradlew 脚本"""
     wrapper_dir = APP_DIR / "gradle" / "wrapper"
     wrapper_dir.mkdir(parents=True, exist_ok=True)
     
@@ -78,8 +80,7 @@ zipStoreBase=GRADLE_USER_HOME
 zipStorePath=wrapper/dists
 '''
     write_file(wrapper_dir / "gradle-wrapper.properties", props)
-
-
+    print("✅ 仅生成 gradle-wrapper.properties（请后续下载官方 gradlew）")
 
 def generate_gradle_properties():
     content = '''org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8
@@ -183,7 +184,6 @@ def generate_main_activity():
 
 import android.os.Bundle
 import androidx.fragment.app.FragmentActivity
-import androidx.leanback.widget.VerticalGridView
 
 class MainActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -221,7 +221,6 @@ def generate_strings():
     write_file(SRC_DIR / "res" / "values" / "strings.xml", content)
 
 def generate_dummy_icon():
-    # 创建一个简单的 ic_launcher.xml（矢量图占位）
     icon = '''<?xml version="1.0" encoding="utf-8"?>
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="48dp"
@@ -241,7 +240,7 @@ def main():
     create_project_structure()
     generate_project_build_gradle()
     generate_settings_gradle()
-    generate_gradle_wrapper()
+    generate_gradle_wrapper_properties()      # ✅ 只生成 properties
     generate_gradle_properties()
     generate_app_build_gradle()
     generate_manifest()
@@ -252,11 +251,18 @@ def main():
 
     print("\n🎉 项目生成完成！")
     print(f"\n📁 项目路径: ./{PROJECT_NAME}")
-    print("\n🔧 构建命令:")
+    print("\n🔧 下一步操作（任选其一）：")
+    print("\n【本地构建】")
     print(f"  cd {PROJECT_NAME}")
+    print("  # 下载官方 gradlew 脚本")
+    print("  wget https://raw.githubusercontent.com/gradle/gradle/v8.7.0/gradlew")
+    print("  chmod +x gradlew")
     print("  ./gradlew assembleDebug --stacktrace")
+    
+    print("\n【CI 构建】")
+    print("  在 GitHub Actions 中使用 wget 下载 gradlew（参考 workflow）")
+    
     print("\n📦 输出 APK: app/build/outputs/apk/debug/app-debug.apk")
 
 if __name__ == "__main__":
-
     main()
