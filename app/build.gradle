@@ -38,10 +38,9 @@ android {
     }
 }
 
-// 解决 Kotlin 重复类冲突
+// 🔧 解决 Kotlin 重复类问题：强制统一标准库，排除旧版 jdk7/jdk8 模块
 configurations.all {
     resolutionStrategy {
-        // 强制使用统一的 Kotlin 标准库版本（建议与插件版本一致）
         force "org.jetbrains.kotlin:kotlin-stdlib:1.8.22"
         exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk7'
         exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk8'
@@ -54,7 +53,7 @@ dependencies {
     implementation 'com.google.android.material:material:1.11.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.2.0'
 
-    // ✅ 添加 Leanback 支持（用于 Android TV）
+    // ✅ 添加 Leanback 支持（用于 Android TV 应用）
     implementation 'androidx.leanback:leanback:1.1.0'
 
     testImplementation 'junit:junit:4.13.2'
