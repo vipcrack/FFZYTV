@@ -1,4 +1,4 @@
-name: Build FFZYTV Android TV App
+name: Build FFZYTV
 
 on: [push, workflow_dispatch]
 
@@ -14,22 +14,20 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Generate FFZYTV Project
+      - name: Generate Project
         run: python3 generate_ffzytv_project.py
-
-      - name: Download Official gradlew Scripts
-        working-directory: FFZYTV
-        run: |
-          # 下载官方 gradlew 脚本（避免手写递归）
-          wget https://raw.githubusercontent.com/gradle/gradle/v8.7.0/gradlew -O gradlew
-          wget https://raw.githubusercontent.com/gradle/gradle/v8.7.0/gradlew.bat -O gradlew.bat
-          chmod +x gradlew
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
+
+      - name: Generate Gradle Wrapper
+        working-directory: FFZYTV
+        run: |
+          # 使用系统 gradle 命令生成完整 wrapper
+          gradle wrapper --gradle-version 8.7
 
       - name: Build Debug APK
         working-directory: FFZYTV
