@@ -1,3 +1,4 @@
+// FFZYTV/settings.gradle
 pluginManagement {
     repositories {
         google()
@@ -5,7 +6,9 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
+
 dependencyResolutionManagement {
+    // 强制所有依赖解析使用 settings 中定义的仓库（推荐模式）
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         google()
