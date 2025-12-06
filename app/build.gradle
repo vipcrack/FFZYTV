@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace 'com.ffzy.tv' // 👈 与 applicationId 一致（来自构建日志）
+    namespace 'com.ffzy.tv' // 👈 与 applicationId 严格一致（来自构建日志）
     compileSdk 34
 
     defaultConfig {
@@ -38,7 +38,7 @@ android {
     }
 }
 
-// 🔧 解决 Kotlin 重复类问题：强制统一标准库，排除旧版 jdk7/jdk8 模块
+// 🔧 解决 Kotlin 重复类冲突：强制统一版本 + 排除废弃模块
 configurations.all {
     resolutionStrategy {
         force "org.jetbrains.kotlin:kotlin-stdlib:1.8.22"
@@ -53,7 +53,7 @@ dependencies {
     implementation 'com.google.android.material:material:1.11.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.2.0'
 
-    // ✅ 添加 Leanback 支持（用于 Android TV 应用）
+    // ✅ 必须添加：Leanback 库（用于 Android TV 的 Theme.Leanback）
     implementation 'androidx.leanback:leanback:1.1.0'
 
     testImplementation 'junit:junit:4.13.2'
