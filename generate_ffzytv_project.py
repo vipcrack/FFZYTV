@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
-# generate_ffzytv_project.py (SAFE FINAL VERSION)
-# 只生成源码和配置，不碰 Gradle Wrapper！
+"""
+FFZYTV Android TV Project Generator (Final Stable Version)
+- Gradle 8.7 + AGP 8.5.0 + Kotlin 1.9.20
+- No manual wrapper generation → use `gradle wrapper` command instead
+- Fully compliant with modern Gradle repository policies
+"""
 
 import os
 from pathlib import Path
@@ -11,11 +15,13 @@ APP_DIR = Path(PROJECT_NAME)
 SRC_DIR = APP_DIR / "app" / "src" / "main"
 JAVA_SRC = SRC_DIR / "java" / "com" / "ffzy" / "tv"
 
+
 def write_file(path: Path, content: str):
     path.parent.mkdir(parents=True, exist_ok=True)
     with open(path, "w", encoding="utf-8") as f:
         f.write(content.strip() + "\n")
     print(f"✅ {path}")
+
 
 def create_project_structure():
     folders = [
@@ -27,18 +33,12 @@ def create_project_structure():
     for folder in folders:
         folder.mkdir(parents=True, exist_ok=True)
 
-# --- 以下函数保持不变（略去重复代码，仅保留关键部分）---
+
 def generate_project_build_gradle():
+    # ⚠️ NO allprojects.repositories — handled in settings.gradle only!
     content = '''plugins {
     id 'com.android.application' version '8.5.0' apply false
     id 'org.jetbrains.kotlin.android' version '1.9.20' apply false
-}
-
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
-    }
 }
 
 task clean(type: Delete) {
@@ -46,6 +46,7 @@ task clean(type: Delete) {
 }
 '''
     write_file(APP_DIR / "build.gradle", content)
+
 
 def generate_settings_gradle():
     content = '''pluginManagement {
@@ -68,6 +69,7 @@ include ':app'
 '''
     write_file(APP_DIR / "settings.gradle", content)
 
+
 def generate_gradle_properties():
     content = '''org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8
 android.useAndroidX=true
@@ -75,6 +77,7 @@ android.enableJetifier=true
 kotlin.code.style=official
 '''
     write_file(APP_DIR / "gradle.properties", content)
+
 
 def generate_app_build_gradle():
     content = '''plugins {
@@ -131,6 +134,7 @@ dependencies {
 '''
     write_file(APP_DIR / "app" / "build.gradle", content)
 
+
 def generate_manifest():
     content = '''<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
@@ -165,6 +169,7 @@ def generate_manifest():
 '''
     write_file(SRC_DIR / "AndroidManifest.xml", content)
 
+
 def generate_main_activity():
     content = '''package com.ffzy.tv
 
@@ -179,6 +184,7 @@ class MainActivity : FragmentActivity() {
 }
 '''
     write_file(JAVA_SRC / "MainActivity.kt", content)
+
 
 def generate_layout():
     content = '''<?xml version="1.0" encoding="utf-8"?>
@@ -199,12 +205,14 @@ def generate_layout():
 '''
     write_file(SRC_DIR / "res" / "layout" / "activity_main.xml", content)
 
+
 def generate_strings():
     content = '''<resources>
     <string name="app_name">FFZYTV</string>
 </resources>
 '''
     write_file(SRC_DIR / "res" / "values" / "strings.xml", content)
+
 
 def generate_dummy_icon():
     icon = '''<?xml version="1.0" encoding="utf-8"?>
@@ -220,9 +228,10 @@ def generate_dummy_icon():
 '''
     write_file(SRC_DIR / "res" / "mipmap-mdpi" / "ic_launcher.xml", icon)
 
+
 def main():
-    print(f"🚀 正在生成 FFZYTV Android TV 项目...\n")
-    
+    print("🚀 正在生成 FFZYTV Android TV 项目（Gradle 8.7 + AGP 8.5.0）...\n")
+
     create_project_structure()
     generate_project_build_gradle()
     generate_settings_gradle()
@@ -236,11 +245,14 @@ def main():
 
     print("\n🎉 项目源码生成完成！")
     print(f"\n📁 项目路径: ./{PROJECT_NAME}")
-    print("\n🔧 下一步：使用系统 Gradle 生成 Wrapper（确保已安装 Gradle）")
+    print("\n🔧 下一步操作：")
     print(f"  cd {PROJECT_NAME}")
+    print("  # 确保已安装 Gradle（或使用 gradle/actions）")
     print("  gradle wrapper --gradle-version 8.7")
-    print("\n📦 然后构建：")
+    print("\n📦 构建 Debug APK：")
     print("  ./gradlew assembleDebug --no-daemon --stacktrace")
+    print("\n💡 提示：不要手动创建 gradle-wrapper.jar！")
+
 
 if __name__ == "__main__":
     main()
