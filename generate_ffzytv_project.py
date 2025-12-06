@@ -79,13 +79,7 @@ zipStorePath=wrapper/dists
 '''
     write_file(wrapper_dir / "gradle-wrapper.properties", props)
 
-    # 生成空 gradlew 脚本（实际使用时由 Gradle Wrapper 自动生成）
-    gradlew = APP_DIR / "gradlew"
-    gradlew_content = '''#!/bin/bash
-./gradlew "$@"
-'''
-    write_file(gradlew, gradlew_content)
-    os.chmod(gradlew, 0o755)
+
 
 def generate_gradle_properties():
     content = '''org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8
@@ -264,4 +258,5 @@ def main():
     print("\n📦 输出 APK: app/build/outputs/apk/debug/app-debug.apk")
 
 if __name__ == "__main__":
+
     main()
