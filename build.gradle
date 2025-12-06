@@ -1,9 +1,11 @@
+// FFZYTV/build.gradle
 plugins {
     id 'com.android.application' version '8.5.0' apply false
     id 'org.jetbrains.kotlin.android' version '1.9.20' apply false
 }
 
-// ❌ 删除 allprojects { repositories { ... } } 整个块！
+// 注意：不要在这里声明 repositories！
+// 所有仓库已在 settings.gradle 中统一管理
 
 task clean(type: Delete) {
     delete rootProject.buildDir
