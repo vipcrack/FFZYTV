@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace 'com.ffzy.tv' // 👈 与 applicationId 严格一致（来自构建日志）
+    namespace 'com.ffzy.tv'
     compileSdk 34
 
     defaultConfig {
@@ -13,7 +13,6 @@ android {
         targetSdk 34
         versionCode 1
         versionName "1.0"
-
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -38,14 +37,17 @@ android {
     }
 }
 
-// 🔧 解决 Kotlin 重复类冲突：强制统一版本 + 排除废弃模块
+// 不再需要 force/exclude（如果 AGP+Kotlin 版本对齐，冲突会自动解决）
+// 但如果仍有冲突，再启用下面这段：
+/*
 configurations.all {
     resolutionStrategy {
-        force "org.jetbrains.kotlin:kotlin-stdlib:1.8.22"
+        force "org.jetbrains.kotlin:kotlin-stdlib:1.9.20"
         exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk7'
         exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk8'
     }
 }
+*/
 
 dependencies {
     implementation 'androidx.core:core-ktx:1.12.0'
@@ -53,7 +55,7 @@ dependencies {
     implementation 'com.google.android.material:material:1.11.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.2.0'
 
-    // ✅ 必须添加：Leanback 库（用于 Android TV 的 Theme.Leanback）
+    // Leanback for TV
     implementation 'androidx.leanback:leanback:1.1.0'
 
     testImplementation 'junit:junit:4.13.2'
